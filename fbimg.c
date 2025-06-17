@@ -63,6 +63,12 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
+    if (vinfo.red.length != 8 || vinfo.green.length != 8 || vinfo.blue.length != 8) {
+        fprintf(stderr, "Error: framebuffer color depth per channel is not 8 bits; framebuffer not supported\n");
+        close(fb_fd);
+        return 1;
+    }
+
     // Map framebuffer memory
     size_t screensize = finfo.smem_len;
     char *fb_ptr = mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fb_fd, 0);
