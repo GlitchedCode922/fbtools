@@ -81,7 +81,7 @@ int main(int argc, char *argv[]){
     // Write pixels to framebuffer
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            int offset = (i * vinfo.xres + j) * (vinfo.bits_per_pixel / 8);
+            int offset = i * finfo.line_length + j * (vinfo.bits_per_pixel / 8);
             int data_offset = (i * width + j) * 3;
             char red;
             char green;
