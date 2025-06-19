@@ -8,6 +8,7 @@
 #include <sys/ioctl.h>
 #include <stdbool.h>
 #include <sys/mman.h>
+#include "include/scale_img.h"
 
 int main(int argc, char *argv[]){
     if (argc != 2){
@@ -67,6 +68,18 @@ int main(int argc, char *argv[]){
         fprintf(stderr, "Error: framebuffer color depth per channel is not 8 bits; framebuffer not supported\n");
         close(fb_fd);
         return 1;
+    }
+
+    if (vinfo.xres < width) {
+        data = scale_image(data, false, width, height, vinfo.xres, height * ((float)vinfo.xres / width));
+        width = vinfo.xres;
+        height = (int)(height * ((float)vinfo.xres / width));
+    }
+
+    if (vinfo.yres < height) {
+        data = scale_image(data, false, width, height, width * ((float)vinfo.yres / height), vinfo.yres);
+        width = (int)(width * ((float)vinfo.yres / height));
+        height = vinfo.yres;
     }
 
     // Map framebuffer memory

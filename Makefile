@@ -7,7 +7,7 @@ all: build/fbimg build/png2fbimg
 
 build/fbimg:
 	@mkdir -p build
-	$(CC) $(CFLAGS) fbimg.c -o build/fbimg
+	$(CC) $(CFLAGS) scale_img.c fbimg.c -o build/fbimg
 
 build/png2fbimg:
 	@mkdir -p build
