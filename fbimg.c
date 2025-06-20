@@ -8,14 +8,45 @@
 #include <sys/ioctl.h>
 #include <stdbool.h>
 #include <sys/mman.h>
+#include <getopt.h>
 #include "include/scale_img.h"
 
 int main(int argc, char *argv[]){
-    if (argc != 2){
+    bool centered;
+    int opt;
+    int option_index = 0;
+
+    static struct option long_options[] = {
+        {"help",     no_argument, 0, 'h'},
+        {"version",  no_argument, 0, 'v'},
+        {"centered", no_argument, 0, 'c'},
+        {0, 0, 0, 0}
+    };
+
+    while ((opt = getopt_long(argc, argv, "hvc", long_options, &option_index)) != -1) {
+        switch (opt) {
+            case 'h':
+                printf("Usage: %s [options] image_path\n", argv[0]);
+                printf("  -h, --help       Show this help message\n");
+                printf("  -v, --version    Show version information\n");
+                printf("  -c, --centered   Enable centered mode\n");
+                return 0;
+            case 'v':
+                printf("fbimg version 1.0\n");
+                return 0;
+            case 'c':
+                centered = true;
+                break;
+            case '?':
+                printf("Unrecognized option\n");
+                return 1;
+        }
+    }
+    if (optind >= argc){
         fprintf(stderr, "Usage: %s <image_path>\n", argv[0]);
         return 1;
     }
-    FILE *file = fopen(argv[1], "rb");
+    FILE *file = fopen(argv[optind], "rb");
     if (!file) {
         perror("Error opening file");
         return 1;
@@ -95,6 +126,9 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
             int offset = i * finfo.line_length + j * (vinfo.bits_per_pixel / 8);
+            if (centered) {
+                offset = (i + (vinfo.yres - height) / 2) * finfo.line_length + (j + (vinfo.xres - width) / 2) * (vinfo.bits_per_pixel / 8);
+            }
             int data_offset = (i * width + j) * 3;
             char red;
             char green;
