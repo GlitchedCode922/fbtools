@@ -12,28 +12,50 @@
 #include "include/scale_img.h"
 
 int main(int argc, char *argv[]){
-    bool centered;
+    bool centered = false;
+    int offset_x = 0, offset_y = 0;
     int opt;
     int option_index = 0;
 
     static struct option long_options[] = {
-        {"help",     no_argument, 0, 'h'},
-        {"version",  no_argument, 0, 'v'},
-        {"centered", no_argument, 0, 'c'},
+        {"help",     no_argument      , 0, 'h'},
+        {"version",  no_argument      , 0, 'v'},
+        {"offset",   required_argument, 0, 'o'},
+        {"centered", no_argument      , 0, 'c'},
         {0, 0, 0, 0}
     };
 
-    while ((opt = getopt_long(argc, argv, "hvc", long_options, &option_index)) != -1) {
+    while ((opt = getopt_long(argc, argv, "hvo:c", long_options, &option_index)) != -1) {
         switch (opt) {
             case 'h':
                 printf("Usage: %s [options] image_path\n", argv[0]);
-                printf("  -h, --help       Show this help message\n");
-                printf("  -v, --version    Show version information\n");
-                printf("  -c, --centered   Enable centered mode\n");
+                printf("  -h, --help       Show this help message.\n");
+                printf("  -v, --version    Show version information.\n");
+                printf("  -o, --offset     Set offset. Takes an argument in the format widthxheight.\n");
+                printf("  -c, --centered   Enable centered mode\n  This option bypasses --offset.\n");
                 return 0;
             case 'v':
                 printf("fbimg version 1.0\n");
                 return 0;
+            case 'o': {
+                char arg[64];
+                strcpy(arg, optarg);
+                char *token = strtok(arg, "x");
+                if (token != NULL) {
+                    offset_x = atoi(token);
+                    token = strtok(NULL, "x");
+                    if (token != NULL) {
+                        offset_y = atoi(token);
+                    } else {
+                        fprintf(stderr, "Invalid offset format. Use widthxheight.\n");
+                        return 1;
+                    }
+                } else {
+                    fprintf(stderr, "Invalid offset format. Use widthxheight.\n");
+                    return 1;
+                }
+                break;
+            }
             case 'c':
                 centered = true;
                 break;
@@ -122,13 +144,23 @@ int main(int argc, char *argv[]){
         return 1;
     }
 
+    if (centered) {
+        offset_x = (vinfo.xres - width) / 2;
+        offset_y = (vinfo.yres - height) / 2;
+    } else {
+        if (offset_x < 0 || offset_y < 0 || offset_x + width > vinfo.xres || offset_y + height > vinfo.yres) {
+            fprintf(stderr, "Error: Offset out of bounds\n");
+            munmap(fb_ptr, screensize);
+            close(fb_fd);
+            free(data);
+            return 1;
+        }
+    }
+
     // Write pixels to framebuffer
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++) {
-            int offset = i * finfo.line_length + j * (vinfo.bits_per_pixel / 8);
-            if (centered) {
-                offset = (i + (vinfo.yres - height) / 2) * finfo.line_length + (j + (vinfo.xres - width) / 2) * (vinfo.bits_per_pixel / 8);
-            }
+            int offset = (i + offset_y) * finfo.line_length + (j + offset_x) * (vinfo.bits_per_pixel / 8);
             int data_offset = (i * width + j) * 3;
             char red;
             char green;
