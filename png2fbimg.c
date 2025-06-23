@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
     }
 
     char *input_file = NULL;
-    char *output_file = NULL;    
+    char *output_file = NULL;
 
     // Parse remaining arguments
     if (optind + 1 < argc) {
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
     const char *rgb = "RGB";
     uint32_t width_uint32 = (uint32_t)width;
     uint32_t height_uint32 = (uint32_t)height;
-    char converted_img[width * height * 3];
+    char *converted_img = malloc(width * height * 3);
 
     memcpy(header, magic, 5);
     memcpy(header + 5, &width_uint32, sizeof(uint32_t));
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
     // Write header to file
     fwrite(header, sizeof(header), 1, output);
     // Write image data to file
-    
+
     for (int px=0; px<width*height; px++) {
         int r = image[px * 4];
         int g = image[px * 4 + 1];
@@ -80,9 +80,10 @@ int main(int argc, char *argv[]) {
         converted_img[px * 3 + 1] = g;
         converted_img[px * 3 + 2] = b;
     }
-    fwrite(converted_img, sizeof(converted_img), 1, output);
+    fwrite(converted_img, 1, width * height * 3, output);
 
     fclose(output);
+    free(converted_img);
     free(image);
 
     return 0;
