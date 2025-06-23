@@ -12,8 +12,35 @@
 #include <stdint.h>
 #include <sys/mman.h>
 #include <time.h>
+#include <getopt.h>
 
 int main(int argc, char *argv[]) {
+    static struct option long_options[] = {
+        {"help" , no_argument, NULL, 'h'},
+        {"usage", no_argument, NULL, 'u'},
+        {NULL, 0, NULL, 0}
+    };
+    int opt;
+    while ((opt = getopt_long(argc, argv, "hu", long_options, NULL)) != -1) {
+        switch (opt) {
+            case 'h':
+                printf("Usage: %s [options] /dev/input/(keyboard_device_node)\n", argv[0]);
+                printf("Options:\n");
+                printf("  -h, --help     Show this help message\n");
+                printf("  -u, --usage    Show usage information\n");
+                return 0;
+            case 'u':
+                printf("This program captures screenshots when the Print Screen or F5 key is pressed.\n");
+                return 0;
+            default:
+                fprintf(stderr, "Usage: %s /dev/input/(keyboard_device_node)\n", argv[0]);
+                exit(EXIT_FAILURE);
+        }
+    }
+    if (optind >= argc) {
+        fprintf(stderr, "Usage: %s /dev/input/(keyboard_device_node)\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
     pid_t pid = fork();
     if (pid < 0) {
         perror("fork failed");
@@ -58,7 +85,7 @@ int main(int argc, char *argv[]) {
     dup2(fd, STDERR_FILENO);
     close(fd);
 
-    const char *device = argv[1];
+    const char *device = argv[optind];
     fd = open(device, O_RDONLY);
     struct input_event ev;
     while (read(fd, &ev, sizeof(ev)) > 0) {
