@@ -6,7 +6,7 @@ BINDIR = $(DESTDIR)/bin
 LIBDIR = $(DESTDIR)/lib
 HEADDIR = $(DESTDIR)/include
 
-all: build/fbimg build/png2fbimg build/fbimg2png build/screenshotd build/libscaleimg.a build/libscaleimg.so
+all: build/fbimg build/png2fbimg build/fbimg2png build/screenshotd build/paint build/libscaleimg.a build/libscaleimg.so
 	@echo "Build completed"
 	@echo "Run make install to install to your system, or copy binaries from build/"
 
@@ -36,6 +36,10 @@ build/screenshotd: screenshotd.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) screenshotd.c -o build/screenshotd
 
+build/paint: paint.c scale_img.c
+	@mkdir -p build
+	$(CC) $(CFLAGS) paint.c scale_img.c -o build/paint
+
 clean:
 	rm -rf build
 
@@ -47,6 +51,7 @@ install:
 	cp build/png2fbimg $(BINDIR)
 	cp build/fbimg2png $(BINDIR)
 	cp build/screenshotd $(BINDIR)
+	cp build/paint $(BINDIR)
 	cp build/libscaleimg.a $(LIBDIR)
 	cp build/libscaleimg.so $(LIBDIR)
 	cp include/scale_img.h $(HEADDIR)
