@@ -259,6 +259,13 @@ int main(int argc, char *argv[]) {
         char *buffer = malloc(256);
         ssize_t bytes_read = read(STDIN_FILENO, buffer, 256);
         if (bytes_read != -1) {
+            buffer[bytes_read] = '\0';
+            if (strcmp(buffer, "dq\n") == 0) {
+                return 0;
+            } else if (strcmp(buffer, "sq\n") == 0) {
+                save_and_exit();
+                return 0;
+            }
             int size = atoi(buffer);
             if (size > 0) {
                 brush_size = size;
