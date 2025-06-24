@@ -294,8 +294,8 @@ int main(int argc, char *argv[]) {
                         if (dx * dx + dy * dy <= r * r) {
                             int px = x + dx;
                             int py = y + dy;
-                            if (px >= 0 && px < vinfo.xres && py >= 0 &&
-                                py < vinfo.yres) {
+                            if (px >= (vinfo.xres - image_width) / 2 && px < vinfo.xres - (vinfo.xres - image_width) / 2 - 1 && py >= (vinfo.yres - image_height) / 2 &&
+                                py < vinfo.yres - (vinfo.yres - image_height) / 2 - 1) {
                                 int offset = py * finfo.line_length +
                                              px * (vinfo.bits_per_pixel / 8);
                                 if (offset >= 0 && offset < finfo.smem_len) {
