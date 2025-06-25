@@ -186,21 +186,36 @@ int main(int argc, char *argv[]) {
     newt.c_lflag &= ~(ECHO); // Disable echo
     tcsetattr(STDIN_FILENO, TCSANOW, &newt);
     fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
-    static struct option long_options[] = {{"help", no_argument, NULL, 'h'},
-                                           {"usage", no_argument, NULL, 'u'},
-                                           {NULL, 0, NULL, 0}};
+    static struct option long_options[] = {
+    {"help", no_argument, NULL, 'h'},
+    {"usage", no_argument, NULL, 'u'},
+    {"color", required_argument, NULL, 'c'},
+    {"size", required_argument, NULL, 's'},
+    {NULL, 0, NULL, 0}};
     int opt;
-    while ((opt = getopt_long(argc, argv, "hu", long_options, NULL)) != -1) {
+    while ((opt = getopt_long(argc, argv, "huc:s:", long_options, NULL)) != -1) {
         switch (opt) {
         case 'h':
             printf("Usage: %s [options] [filename]\n", argv[0]);
             printf("Options:\n");
             printf("  -h, --help     Show this help message\n");
             printf("  -u, --usage    Show usage information\n");
+            printf("  -c, --color    Set brush color (hex format)\n");
+            printf("  -s, --size     Set brush size (positive integer)\n");
             return 0;
         case 'u':
             printf("A painting program that runs on the framebuffer\n");
             return 0;
+        case 'c':
+            parse_color(optarg, brush_color);
+            break;
+        case 's':
+            brush_size = atoi(optarg);
+            if (brush_size <= 0) {
+                fprintf(stderr, "Error: Brush size must be a positive integer\n");
+                return 1;
+            }
+            break;
         default:
             fprintf(stderr, "Usage: %s [options] [filename]\n", argv[0]);
             exit(EXIT_FAILURE);
