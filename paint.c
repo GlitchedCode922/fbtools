@@ -23,6 +23,73 @@ char *fb_ptr;
 char brush_color[3] = {0xFF, 0xFF, 0xFF}; // Default brush color: white
 int brush_size = 30;                      // Default brush size
 
+void draw_circle(int x, int y){
+    int r = brush_size / 2;
+    for (int dy = -r; dy <= r; dy++) {
+        for (int dx = -r; dx <= r; dx++) {
+            if (dx * dx + dy * dy <= r * r) {
+                int px = x + dx;
+                int py = y + dy;
+                if (px >= (vinfo.xres - image_width) / 2 && px < vinfo.xres - (vinfo.xres - image_width) / 2 - 1 && py >= (vinfo.yres - image_height) / 2 &&
+                    py < vinfo.yres - (vinfo.yres - image_height) / 2 - 1) {
+                    int offset = py * finfo.line_length +
+                                 px * (vinfo.bits_per_pixel / 8);
+                    if (offset >= 0 && offset < finfo.smem_len) {
+                        *((char *)(fb_ptr + offset + (vinfo.red.offset / 8))) = brush_color[0];
+                        *((char *)(fb_ptr + offset + (vinfo.green.offset / 8))) = brush_color[1];
+                        *((char *)(fb_ptr + offset + (vinfo.blue.offset / 8))) = brush_color[2];
+                    }
+                }
+            }
+        }
+    }
+}
+
+int **bresenham(int x1, int y1, int x2, int y2, int *out_count) {
+    int dx = abs(x2 - x1);
+    int dy = abs(y2 - y1);
+    int sx = (x1 < x2) ? 1 : -1;
+    int sy = (y1 < y2) ? 1 : -1;
+
+    int max_points = dx > dy ? dx + 1 : dy + 1;  // number of points on the line
+    int **points = malloc(max_points * sizeof(int*));
+    if (!points) return NULL;
+
+    for (int i = 0; i < max_points; i++) {
+        points[i] = malloc(2 * sizeof(int));
+        if (!points[i]) {
+            // free previously allocated rows on failure
+            for (int j = 0; j < i; j++) free(points[j]);
+            free(points);
+            return NULL;
+        }
+    }
+
+    int err = (dx > dy ? dx : -dy) / 2;
+    int x = x1, y = y1, i = 0;
+
+    while (true) {
+        points[i][0] = x;
+        points[i][1] = y;
+        i++;
+
+        if (x == x2 && y == y2) break;
+
+        int e2 = err;
+        if (e2 > -dx) {
+            err -= dy;
+            x += sx;
+        }
+        if (e2 < dy) {
+            err += dx;
+            y += sy;
+        }
+    }
+
+    *out_count = i;
+    return points;
+}
+
 void parse_color(const char *buffer, char *brush_color) {
     // Skip '#' or '0x' if present
     if (buffer[0] == '#') buffer++;
@@ -309,30 +376,14 @@ int main(int argc, char *argv[]) {
             if (y >= vinfo.yres - (vinfo.yres - image_height) / 2)
                 y = vinfo.yres - (vinfo.yres - image_height) / 2 - 1;
             if (mouse[0] & 1) {
-                int r = brush_size / 2;
-                for (int dy = -r; dy <= r; dy++) {
-                    for (int dx = -r; dx <= r; dx++) {
-                        if (dx * dx + dy * dy <= r * r) {
-                            int px = x + dx;
-                            int py = y + dy;
-                            if (px >= (vinfo.xres - image_width) / 2 && px < vinfo.xres - (vinfo.xres - image_width) / 2 - 1 && py >= (vinfo.yres - image_height) / 2 &&
-                                py < vinfo.yres - (vinfo.yres - image_height) / 2 - 1) {
-                                int offset = py * finfo.line_length +
-                                             px * (vinfo.bits_per_pixel / 8);
-                                if (offset >= 0 && offset < finfo.smem_len) {
-                                    *((char *)(fb_ptr + offset +
-                                               (vinfo.red.offset / 8))) =
-                                        brush_color[0];
-                                    *((char *)(fb_ptr + offset +
-                                               (vinfo.green.offset / 8))) =
-                                        brush_color[1];
-                                    *((char *)(fb_ptr + offset +
-                                               (vinfo.blue.offset / 8))) =
-                                        brush_color[2];
-                                }
-                            }
-                        }
+                int count = 0;
+                int **line_points = bresenham(x - mouse[1], y + mouse[2], x, y, &count);
+                if (line_points) {
+                    for (int i = 0; i < count; i++) {
+                        draw_circle(line_points[i][0], line_points[i][1]);
+                        free(line_points[i]);
                     }
+                    free(line_points);
                 }
             }
         }
