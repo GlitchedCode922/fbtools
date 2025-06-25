@@ -276,6 +276,12 @@ int main(int argc, char *argv[]) {
         if (bytes_read != -1) {
             buffer[bytes_read] = '\0';
             if (strcmp(buffer, "dq\n") == 0) {
+                tcsetattr(STDOUT_FILENO, TCSANOW, &oldt);
+                printf("\033[?25h");  // Show cursor
+                fflush(stdout);
+                munmap(fb_ptr, finfo.smem_len);
+                close(fb_fd);
+                exit(0);
                 return 0;
             } else if (strcmp(buffer, "sq\n") == 0) {
                 save_and_exit();
