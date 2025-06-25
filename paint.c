@@ -120,8 +120,6 @@ void save_and_exit() {
             data[data_offset + 2] = blue;
         }
     }
-    memset(fb_ptr, 0x00, finfo.smem_len); // Clear framebuffer
-    printf("\n");                         // Cause an fbcon redraw
     FILE *file = fopen(filename, "wb");
     tcsetattr(STDOUT_FILENO, TCSANOW, &oldt);
     if (!file) {
@@ -136,7 +134,7 @@ void save_and_exit() {
     fwrite(color, 1, 3, file);
     fwrite(data, 1, image_width * image_height * 3, file);
     fclose(file);
-    printf("\033[?25h");  // Show cursor
+    printf("\033[?25h\033[H\033[J");  // Show cursor and clear console
     fflush(stdout);
     munmap(fb_ptr, finfo.smem_len);
     close(fb_fd);
@@ -344,7 +342,7 @@ int main(int argc, char *argv[]) {
             buffer[bytes_read] = '\0';
             if (strcmp(buffer, "dq\n") == 0) {
                 tcsetattr(STDOUT_FILENO, TCSANOW, &oldt);
-                printf("\033[?25h");  // Show cursor
+                printf("\033[?25h\033[H\033[J");  // Show cursor and clear console
                 fflush(stdout);
                 munmap(fb_ptr, finfo.smem_len);
                 close(fb_fd);
