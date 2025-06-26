@@ -18,6 +18,7 @@ struct fb_var_screeninfo vinfo;
 struct fb_fix_screeninfo finfo;
 struct termios oldt, newt;
 char *filename;
+volatile sig_atomic_t interrupt = 0;
 int fb_fd;
 char *fb_ptr;
 char brush_color[3] = {0xFF, 0xFF, 0xFF}; // Default brush color: white
@@ -101,6 +102,10 @@ void parse_color(const char *buffer, char *brush_color) {
         brush_color[1] = (hex >> 8) & 0xFF;  // Green
         brush_color[2] = hex & 0xFF;         // Blue
     }
+}
+
+void sigint() {
+    interrupt = 1;
 }
 
 void save_and_exit() {
@@ -245,7 +250,7 @@ int draw_image(char fname[], int offset_x, int offset_y, bool centered) {
 int main(int argc, char *argv[]) {
     printf("\033[?25l");  // Hide cursor
     fflush(stdout);
-    signal(SIGINT, save_and_exit);
+    signal(SIGINT, sigint);
     tcgetattr(STDIN_FILENO, &oldt);
     newt = oldt;
     newt.c_lflag &= ~(ECHO); // Disable echo
@@ -336,6 +341,9 @@ int main(int argc, char *argv[]) {
     }
     int x = 0, y = 0;
     while (true) {
+        if (interrupt) {
+            save_and_exit();
+        }
         char *buffer = malloc(256);
         ssize_t bytes_read = read(STDIN_FILENO, buffer, 256);
         if (bytes_read != -1) {
