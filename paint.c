@@ -340,6 +340,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
     int x = 0, y = 0;
+    int prev_x = 0, prev_y = 0;
+    char *pixel = (char[]){fb_ptr[0],fb_ptr[1],fb_ptr[2]};
     while (true) {
         if (interrupt) {
             save_and_exit();
@@ -371,6 +373,8 @@ int main(int argc, char *argv[]) {
         signed char mouse[3];
         ssize_t bytes = read(mousedev, mouse, sizeof(mouse));
         if (bytes == 3) {
+            prev_x = x;
+            prev_y = y;
             x += mouse[1];
             y -= mouse[2];
             if (x < (vinfo.xres - image_width) / 2)
@@ -381,9 +385,13 @@ int main(int argc, char *argv[]) {
                 x = vinfo.xres - (vinfo.xres - image_width) / 2 - 1;
             if (y >= vinfo.yres - (vinfo.yres - image_height) / 2)
                 y = vinfo.yres - (vinfo.yres - image_height) / 2 - 1;
+            memcpy(fb_ptr + (prev_y * finfo.line_length) + prev_x * (vinfo.bits_per_pixel/8), pixel, 3);
+            memcpy(pixel, fb_ptr + (y * finfo.line_length) + x * (vinfo.bits_per_pixel/8), 3);
+            char *ipixel = (char[]){~pixel[0], ~pixel[1], ~pixel[2]};
+            memcpy(fb_ptr + (y * finfo.line_length) + x * (vinfo.bits_per_pixel/8), ipixel, 3);
             if (mouse[0] & 1) {
                 int count = 0;
-                int **line_points = bresenham(x - mouse[1], y + mouse[2], x, y, &count);
+                int **line_points = bresenham(prev_x, prev_y, x, y, &count);
                 if (line_points) {
                     for (int i = 0; i < count; i++) {
                         draw_circle(line_points[i][0], line_points[i][1]);
