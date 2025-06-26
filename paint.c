@@ -248,14 +248,6 @@ int draw_image(char fname[], int offset_x, int offset_y, bool centered) {
 }
 
 int main(int argc, char *argv[]) {
-    printf("\033[?25l");  // Hide cursor
-    fflush(stdout);
-    signal(SIGINT, sigint);
-    tcgetattr(STDIN_FILENO, &oldt);
-    newt = oldt;
-    newt.c_lflag &= ~(ECHO); // Disable echo
-    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
-    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
     static struct option long_options[] = {
     {"help", no_argument, NULL, 'h'},
     {"usage", no_argument, NULL, 'u'},
@@ -291,6 +283,15 @@ int main(int argc, char *argv[]) {
             exit(EXIT_FAILURE);
         }
     }
+
+    printf("\033[?25l");  // Hide cursor
+    fflush(stdout);
+    signal(SIGINT, sigint);
+    tcgetattr(STDIN_FILENO, &oldt);
+    newt = oldt;
+    newt.c_lflag &= ~(ECHO); // Disable echo
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+    fcntl(STDIN_FILENO, F_SETFL, O_NONBLOCK);
 
     fb_fd = open("/dev/fb0", O_RDWR);
     if (fb_fd == -1) {
