@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - feature/*
+      - bugfix/*
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  format:
+    name: Formatting checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          sudo apt update
+          sudo apt install clang-format
+
+      - name: Run clang-format
+        run: |
+          clang-format --dry-run --Werror *.c include/*.h
+
+  build:
+    name: Compile FBTools
+    needs: format
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y musl-dev musl-tools linux-headers-generic binutils make
+
+      - name: Compilation
+        run: |
+          make CC=musl-gcc CFLAGS=-static
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          path: |
+            build/fbimg
+            build/fbimg2png
+            build/png2fbimg
+            build/paint
+            build/screenshotd
+            build/libscaleimg.a
+            build/libscaleimg.so
+            README.md
+            COPYING
+            THIRDPARTY.md
+          name: x86_64-linux-fbtools
