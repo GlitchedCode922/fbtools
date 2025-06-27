@@ -38,11 +38,17 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y musl-dev musl-tools linux-headers-generic binutils make
+          sudo apt install -y musl-dev musl-tools linux-libc-dev linux-headers-generic binutils make
+
+      - name: Symlink linux/, asm/ and asm-generic/
+        run: |
+          sudo cp -rs /usr/include/linux/ linux/
+          sudo cp -rs /usr/include/x86_64-linux-gnu/asm/ asm/
+          sudo cp -rs /usr/include/asm-generic/ asm-generic/
 
       - name: Compilation
         run: |
-          make CC=musl-gcc CFLAGS=-static
+          make CC=musl-gcc CFLAGS="-static -I."
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
