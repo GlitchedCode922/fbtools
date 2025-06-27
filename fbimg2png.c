@@ -1,17 +1,17 @@
 #include <getopt.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+
 #include "thirdparty/lodepng/lodepng.h"
 
 int main(int argc, char *argv[]) {
     const struct option long_options[] = {
         {"help", no_argument, NULL, 'h'},
         {"version", no_argument, NULL, 'v'},
-        {NULL, 0, NULL, 0}
-    };
+        {NULL, 0, NULL, 0}};
 
     int opt;
     while ((opt = getopt_long(argc, argv, "hv", long_options, NULL)) != -1) {
@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     }
     char magic[6] = {0};
     fread(magic, 1, 5, input);
-    if (strcmp(magic, "FBIMG") != 0 ) {
+    if (strcmp(magic, "FBIMG") != 0) {
         fprintf(stderr, "Invalid file format: %s\n", input_file);
         fclose(input);
         return 1;

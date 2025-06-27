@@ -1,0 +1,11 @@
+BasedOnStyle: Google
+IndentWidth: 4
+UseTab: Never
+SortIncludes: true
+AllowShortIfStatementsOnASingleLine: true
+AllowShortFunctionsOnASingleLine: true
+AllowShortLoopsOnASingleLine: true
+AlignTrailingComments: false
+SpacesBeforeTrailingComments: 1
+ColumnLimit: 0
+BreakBeforeBraces: Attach

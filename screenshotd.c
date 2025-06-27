@@ -1,25 +1,24 @@
+#include <fcntl.h>
+#include <getopt.h>
+#include <linux/fb.h>
 #include <linux/input-event-codes.h>
+#include <linux/input.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <linux/input.h>
 #include <string.h>
 #include <sys/ioctl.h>
-#include <linux/fb.h>
-#include <stdint.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
-#include <getopt.h>
+#include <unistd.h>
 
 int main(int argc, char *argv[]) {
     static struct option long_options[] = {
-        {"help" , no_argument, NULL, 'h'},
+        {"help", no_argument, NULL, 'h'},
         {"usage", no_argument, NULL, 'u'},
-        {NULL, 0, NULL, 0}
-    };
+        {NULL, 0, NULL, 0}};
     int opt;
     while ((opt = getopt_long(argc, argv, "hu", long_options, NULL)) != -1) {
         switch (opt) {
@@ -115,8 +114,8 @@ int main(int argc, char *argv[]) {
                     free(image);
                     return 1;
                 }
-                for (int i=0;i<vinfo.yres;i++) {
-                    for (int v=0;v<vinfo.xres;v++) {
+                for (int i = 0; i < vinfo.yres; i++) {
+                    for (int v = 0; v < vinfo.xres; v++) {
                         int px = (i * finfo.line_length) + v * (vinfo.bits_per_pixel / 8);
                         unsigned char r, g, b;
                         r = fb_ptr[px + (vinfo.red.offset / 8)];

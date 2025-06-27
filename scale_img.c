@@ -1,4 +1,5 @@
 #include "include/scale_img.h"
+
 #include <stdbool.h>
 #include <stdlib.h>
 
@@ -18,15 +19,15 @@ unsigned char lerp(unsigned char a, unsigned char b, float t) {
     return (unsigned char)(result);
 }
 
-char *scale_image(char *image, bool bgr, int width, int height, int new_width, int new_height){
+char *scale_image(char *image, bool bgr, int width, int height, int new_width, int new_height) {
     char *scaled_image = (char *)malloc(new_width * new_height * 3);
     char *converted_image = (char *)malloc(width * height * 3);
-    if (bgr){
+    if (bgr) {
         // Convert BGR to RGB
         for (int i = 0; i < width * height * 3; i += 3) {
-            converted_image[i] = image[i + 2];     // R
+            converted_image[i] = image[i + 2]; // R
             converted_image[i + 1] = image[i + 1]; // G
-            converted_image[i + 2] = image[i];     // B
+            converted_image[i + 2] = image[i]; // B
         }
     } else {
         // Copy RGB directly
@@ -35,8 +36,8 @@ char *scale_image(char *image, bool bgr, int width, int height, int new_width, i
         }
     }
 
-    for (int w=0;w<new_width;w++){
-        for (int h=0;h<new_height;h++){
+    for (int w = 0; w < new_width; w++) {
+        for (int h = 0; h < new_height; h++) {
             float orig_x = w * ((float)width / new_width);
             float orig_y = h * ((float)height / new_height);
             int x0 = floorpx(orig_x);

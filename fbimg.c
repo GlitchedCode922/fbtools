@@ -1,29 +1,29 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <linux/fb.h>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/ioctl.h>
-#include <stdbool.h>
-#include <sys/mman.h>
 #include <getopt.h>
+#include <linux/fb.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
 #include "include/scale_img.h"
 
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[]) {
     bool centered = false;
     int offset_x = 0, offset_y = 0;
     int opt;
     int option_index = 0;
 
     static struct option long_options[] = {
-        {"help",     no_argument      , 0, 'h'},
-        {"version",  no_argument      , 0, 'v'},
-        {"offset",   required_argument, 0, 'o'},
-        {"centered", no_argument      , 0, 'c'},
-        {0, 0, 0, 0}
-    };
+        {"help", no_argument, 0, 'h'},
+        {"version", no_argument, 0, 'v'},
+        {"offset", required_argument, 0, 'o'},
+        {"centered", no_argument, 0, 'c'},
+        {0, 0, 0, 0}};
 
     while ((opt = getopt_long(argc, argv, "hvo:c", long_options, &option_index)) != -1) {
         switch (opt) {
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]){
                 return 1;
         }
     }
-    if (optind >= argc){
+    if (optind >= argc) {
         fprintf(stderr, "Usage: %s <image_path>\n", argv[0]);
         return 1;
     }
@@ -177,11 +177,11 @@ int main(int argc, char *argv[]){
             }
             uint32_t pixel = 0;
             if (vinfo.transp.length > 0) {
-                *((char *)(fb_ptr + offset + (vinfo.transp.offset/8))) = alpha;
+                *((char *)(fb_ptr + offset + (vinfo.transp.offset / 8))) = alpha;
             }
-            *((char *)(fb_ptr + offset + (vinfo.red.offset/8))) = red;
-            *((char *)(fb_ptr + offset + (vinfo.green.offset/8))) = green;
-            *((char *)(fb_ptr + offset + (vinfo.blue.offset/8))) = blue;
+            *((char *)(fb_ptr + offset + (vinfo.red.offset / 8))) = red;
+            *((char *)(fb_ptr + offset + (vinfo.green.offset / 8))) = green;
+            *((char *)(fb_ptr + offset + (vinfo.blue.offset / 8))) = blue;
         }
     }
 

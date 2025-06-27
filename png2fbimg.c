@@ -1,16 +1,16 @@
 #include <getopt.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "thirdparty/lodepng/lodepng.h"
 
 int main(int argc, char *argv[]) {
     const struct option long_options[] = {
         {"help", no_argument, NULL, 'h'},
         {"version", no_argument, NULL, 'v'},
-        {NULL, 0, NULL, 0}
-    };
+        {NULL, 0, NULL, 0}};
 
     int opt;
     while ((opt = getopt_long(argc, argv, "hv", long_options, NULL)) != -1) {
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
     fwrite(header, sizeof(header), 1, output);
     // Write image data to file
 
-    for (int px=0; px<width*height; px++) {
+    for (int px = 0; px < width * height; px++) {
         int r = image[px * 4];
         int g = image[px * 4 + 1];
         int b = image[px * 4 + 2];
